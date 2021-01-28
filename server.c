@@ -1,56 +1,63 @@
-#include<stdio.h>
-	int n;
-	int i;
-	int id;
-	double balance;
-	char name[100];
-	char gender[10];
-	char date[100];
-	char intro[100] = "----------------Covid-19 Management Reporting System-----------------";
-	char user[100];
-	char codition[100];
-	char official[100] = "Health Official username:";
-		
-	FILE *cfPtr;
-	
-void main(){
-	printf("\n----------------Covid-19 Management Reporting System-----------------\n");
-	printf("\nEnter the number of patient records :");
-	scanf("%d",&n);
-	
-	if((cfPtr = fopen("treat.txt","w")) == NULL){
-		
-		printf("File couldn`t be loaded.");
-		
-	}else{
-		
-		printf("\t\n-------------------Health Official use-------------\n");
-		printf("Enter your username: ");
-		scanf("%s",&user);
-			
-		printf("\t\t-----Patient Details------\n");
-	
-		for(i = 0; i < n && !feof(stdin); i++){
-			printf("\nRecord[%d]\n",i+1);
-		printf("\nPatient`s name:");
-		scanf("%s",&name);
-		
-		printf("\nDate of identification:");
-		scanf("%s",&date);
-		
-		printf("\nGender:");
-		scanf("%s",&gender);
-		
-		printf("\nPatient`s condition (symptomatic and asymptomatic):");
-		scanf("%s",&codition);
-		printf("\t\n----------------------------------------------------------------------------------\n\n");
-		
-		//details......
-				
-				fprintf(cfPtr,"%d,%s,%s,%s,%s\n",id,name,date,gender,codition);
-			}
-			fclose(cfPtr);
-		}
-}
-// gu3vdidi
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <time.h>
 
+int sockfd = 0,acceptfd = 0;
+char data[1024];
+struct sockaddr_in serv_env;
+time_t ticks;
+int main(int argc,char *argv[]){
+
+// creating socket
+sockfd = socket(AF_INET,SOCK_STREAM,0);
+if (sockfd < 0) {
+   /* code here */ 
+   perror("Error:");
+   exit(1);
+}else {
+   /* code here */ 
+   puts("----------Socket created --------");
+}
+
+// set memmory locations values
+memset(&serv_env,'0',sizeof(serv_env));
+memset(data,'0',sizeof(data));
+
+// establish server port and address
+serv_env.sin_family = AF_INET;
+serv_env.sin_port = htons(5000);
+serv_env.sin_addr.s_addr = htonl(INADDR_ANY);
+// binding the connection
+bind(sockfd,(struct sockaddr*)&serv_env,sizeof(serv_env));
+
+// listening to the clients
+int lisen = listen(sockfd,10);// listening to 10 clients maximum
+if (lisen < 0) {
+   /* code here */ 
+   perror("listen() failed:");
+   exit(1);
+} else {
+   /* code here */ 
+   puts("*********Handshake sucessfull*******");
+}
+while (1) {// Infinite loop to keep the server running
+   /* code here */ 
+   ticks = time(NULL);
+
+    acceptfd = accept(sockfd,(struct sockaddr*)NULL,NULL);
+    snprintf(data,sizeof(data),"%.24s\r\n",ctime(&ticks));// storing the time in the data variable.
+
+    write(acceptfd,data,sizeof(data));
+    close(acceptfd);
+puts("Running.......");
+    sleep(2);// Sleep the server for 2 seconds to prevent it from over use the CPU processing.
+}
+return 0;
+}
